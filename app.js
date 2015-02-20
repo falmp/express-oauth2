@@ -10,6 +10,7 @@ var passport = require('passport');
 var OAuth2Strategy = require('passport-oauth2');
 var debug = require('debug')('express-oauth2:app');
 var flash = require('connect-flash');
+var RedisStore = require('connect-redis')(session);
 
 var app = express();
 
@@ -74,11 +75,18 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(session({ secret: 'keyboard cat' })); // TODO redis
+app.use(session({
+  store: new RedisStore({
+    host: '127.0.0.1',
+    port: 6379
+  }),
+  secret: 'hey you',
+  resave: false,
+  saveUninitialized: false
+}));
 app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(passport.initialize());
 app.use(function(req, res, next) {
     res.locals.user = req.user;
     next();
