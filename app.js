@@ -5,11 +5,26 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var swig = require('swig');
+var passport = require('passport');
+var OAuth2Strategy = require('passport-oauth').OAuth2Strategy;
+var debug = require('debug')('express-oauth2:app');
 
 var routes = require('./routes/index');
 //var users = require('./routes/users');
 
 var app = express();
+
+passport.use('bioid', new OAuth2Strategy({
+  authorizationURL: 'https://www.provider.com/oauth2/authorize',
+  tokenURL: 'https://www.provider.com/oauth2/token',
+  clientID: 'infonexo-web',
+  clientSecret: '123',
+  callbackURL: 'http://localhost:3000/auth/callback'
+},
+function(accessToken, refreshToken, profile, done) {
+  debug('access token: %s, refresh token: %s, profile id: %s', accessToken, refreshToken, profile.id);
+  done(err, user);
+}));
 
 // view engine setup
 app.engine('swig', swig.renderFile);
