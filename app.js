@@ -4,26 +4,61 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var session = require('express-session');
 var swig = require('swig');
 var passport = require('passport');
-var OAuth2Strategy = require('passport-oauth').OAuth2Strategy;
+var OAuth2Strategy = require('passport-oauth2');
 var debug = require('debug')('express-oauth2:app');
-
-var routes = require('./routes/index');
-//var users = require('./routes/users');
+var flash = require('connect-flash');
 
 var app = express();
 
+OAuth2Strategy.prototype.userProfile = function(accessToken, done) {
+  debug('requesting user profile with access token %s', accessToken);
+ 
+  this._oauth2.get('http://localhost:3001/oauth/users/info', accessToken, function (err, body, res) {
+    var json;
+    
+    if (err) {
+      if (err.data) {
+        try {
+          json = JSON.parse(err.data);
+        } catch (_) {}
+      }
+      
+      return done(new Error('failed to fetch user profile', err));
+    }
+    
+    try {
+      json = JSON.parse(body);
+    } catch (ex) {
+      return done(new Error('failed to parse user profile'));
+    }
+    
+    json.provider = 'bioid';
+  
+    return done(null, json);
+  });
+}
+
+passport.serializeUser(function(user, done) {
+  done(null, JSON.stringify(user));
+});
+
+passport.deserializeUser(function(user, done) {
+  done(null, JSON.parse(user));
+});
+
 passport.use('bioid', new OAuth2Strategy({
-  authorizationURL: 'https://www.provider.com/oauth2/authorize',
-  tokenURL: 'https://www.provider.com/oauth2/token',
+  authorizationURL: 'http://localhost:3001/oauth/authorize',
+  tokenURL: 'http://localhost:3001/oauth/token',
   clientID: 'infonexo-web',
   clientSecret: '123',
   callbackURL: 'http://localhost:3000/auth/callback'
 },
 function(accessToken, refreshToken, profile, done) {
-  debug('access token: %s, refresh token: %s, profile id: %s', accessToken, refreshToken, profile.id);
-  done(err, user);
+  debug('access token: %s, profile: %s', accessToken, refreshToken, JSON.stringify(profile));
+  done(null, profile.user); // TODO should actually return the user to be stored in req.user
 }));
 
 // view engine setup
@@ -35,10 +70,22 @@ app.set('view cache', false);
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));
 app.use(logger('dev'));
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(session({ secret: 'keyboard cat' })); // TODO redis
+app.use(flash());
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(passport.initialize());
+app.use(function(req, res, next) {
+    res.locals.user = req.user;
+    next();
+});
+
+var routes = require('./routes/index')(passport);
+//var users = require('./routes/users');
 
 app.use('/', routes);
 //app.use('/users', users);
