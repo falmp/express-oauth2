@@ -78,7 +78,8 @@ app.use(cookieParser());
 app.use(session({
   store: new RedisStore({
     host: '127.0.0.1',
-    port: 6379
+    port: 6379,
+    prefix: 'express-oauth2.sid:'
   }),
   secret: 'hey you',
   resave: false,
