@@ -6,10 +6,10 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var session = require('express-session');
 var swig = require('swig');
-var passport = require('passport');
-var OAuth2Strategy = require('passport-oauth2');
 var debug = require('debug')('express-oauth2:app');
 var flash = require('connect-flash');
+var passport = require('passport');
+var OAuth2Strategy = require('passport-oauth2');
 var RedisStore = require('connect-redis')(session);
 
 var app = express();
@@ -58,7 +58,7 @@ passport.use('bioid', new OAuth2Strategy({
   callbackURL: 'http://localhost:3000/auth/callback'
 },
 function(accessToken, refreshToken, profile, done) {
-  debug('access token: %s, profile: %s', accessToken, refreshToken, JSON.stringify(profile));
+  debug('access token: %s, profile: %s', accessToken, JSON.stringify(profile));
   done(null, profile.user); // TODO should actually return the user to be stored in req.user
 }));
 
