@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}Infonexo{% endblock %}</title>
+    <title>{% block title %}Express-OAuth2{% endblock %}</title>
 
     <!-- Bootstrap -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
@@ -19,7 +19,19 @@
   <body>
     <div class="container">
       <div class="jumbotron">
-        <h1>{% block title %}Infonexo{% endblock %}</h1>
+        <h1>{% block title %}Express-OAuth2{% endblock %}</h1>
+        {% if flash.error %}
+          <div class="alert alert-danger" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            {{ flash.error }}
+          </div>
+        {% endif %}
+        {% if flash.success %}
+          <div class="alert alert-success" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            {{ flash.success }}
+          </div>
+        {% endif %}
         {% block content %}
         {% endblock %}
       </div>
