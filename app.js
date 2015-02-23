@@ -82,6 +82,7 @@ app.use(session({
     prefix: 'express-oauth2.sid:'
   }),
   secret: 'hey you',
+  name: 'express-oauth2.sid',
   resave: false,
   saveUninitialized: false
 }));
