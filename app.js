@@ -59,7 +59,7 @@ passport.use('bioid', new OAuth2Strategy({
 },
 function(accessToken, refreshToken, profile, done) {
   debug('access token: %s, profile: %s', accessToken, JSON.stringify(profile));
-  done(null, profile.user); // TODO should actually return the user to be stored in req.user
+  done(null, profile.user);
 }));
 
 // view engine setup
